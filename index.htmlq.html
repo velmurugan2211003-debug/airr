@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Industry Environmental Compliance — Tamil Nadu</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700&family=Noto+Sans:wght@300;400;500;600;700&family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<style>
+:root{
+  --g1:#0f766e;--g2:#14b8a6;--g3:#99f6e4;--g4:#f0fdfa;--g5:#ccfbf1;
+  --red:#dc2626;--amber:#d97706;--blue:#2563eb;--purple:#7c3aed;
+  --t1:#0f172a;--t2:#334155;--t3:#64748b;--t4:#94a3b8;
+  --bg:#f8fafc;--bdr:#e2e8f0;--card:#fff;
+  --fd:"Noto Serif",Georgia,serif;--fb:"Noto Sans",Arial,sans-serif;--fm:"Source Code Pro",monospace;
+  --sh:0 2px 12px rgba(0,0,0,.07);--sh2:0 6px 24px rgba(0,0,0,.12);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:15px}
+body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh;display:flex;flex-direction:column}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+@keyframes ticker{0%{transform:translateX(100%)}100%{transform:translateX(-200%)}}
+@keyframes cardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes alertPulse{0%,100%{box-shadow:0 0 0 2px rgba(220,38,38,.3)}50%{box-shadow:0 0 0 8px rgba(220,38,38,.05)}}
+
+.top-bar{background:var(--g1);padding:5px 24px;display:flex;align-items:center;justify-content:space-between}
+.tb-l{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--g3);text-transform:uppercase}
+.tb-r{display:flex;align-items:center;gap:8px}
+.cdot{width:8px;height:8px;border-radius:50%;background:#fbbf24;transition:background .4s}
+.cdot.on{background:#6ee7b7;animation:pulse 2s infinite}
+.ctxt{font-family:var(--fm);font-size:10px;color:var(--g3);font-weight:700}
+
+.hdr{background:var(--card);border-bottom:3px solid var(--g1);box-shadow:var(--sh)}
+.hdr-inner{display:flex;align-items:center;gap:16px;padding:13px 24px;max-width:1700px;margin:0 auto}
+.logo{width:50px;height:50px;background:linear-gradient(135deg,var(--g1),var(--g2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.hdr-text{flex:1}
+.hdr-tag{font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--g1);text-transform:uppercase;margin-bottom:3px}
+.hdr-title{font-family:var(--fd);font-size:20px;font-weight:700;color:var(--t1)}
+.hdr-sub{font-size:11px;color:var(--t3);margin-top:3px}
+.hdr-r{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+.pill{display:flex;align-items:center;gap:6px;padding:4px 12px;background:var(--g4);border:1px solid var(--g5);border-radius:20px}
+.pdot{width:8px;height:8px;border-radius:50%;background:var(--g2);animation:pulse 1.5s infinite}
+.ptxt{font-size:11px;font-weight:700;color:var(--g1);letter-spacing:.08em}
+.clock{font-family:var(--fm);font-size:11px;color:var(--t3)}
+
+.ticker{background:var(--g4);border-bottom:1px solid var(--g5);padding:5px 24px;display:flex;align-items:center;gap:12px;overflow:hidden}
+.t-lbl{font-size:10px;font-weight:700;color:var(--g1);letter-spacing:.1em;padding:2px 8px;border:1px solid var(--g2);border-radius:3px;background:#fff;white-space:nowrap;flex-shrink:0}
+.t-scroll{overflow:hidden;flex:1}
+.t-scroll span{display:inline-block;animation:ticker 40s linear infinite;font-size:12px;color:var(--t2);font-weight:500;white-space:nowrap}
+
+.main{flex:1;padding:18px 24px 28px;max-width:1700px;margin:0 auto;width:100%}
+
+/* BUCK SWITCH BANNER */
+.sw-banner{padding:10px 16px;border-radius:8px;margin-bottom:14px;display:flex;align-items:center;gap:12px;font-size:13px;font-weight:700;transition:all .4s;border:1px solid}
+.sw-banner.on{background:#f0fdfa;border-color:var(--g3);color:var(--g1)}
+.sw-banner.off{background:#fff7ed;border-color:#fed7aa;color:#c2410c}
+.sw-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.sw-banner.on .sw-dot{background:var(--g2);animation:pulse 1.5s infinite}
+.sw-banner.off .sw-dot{background:#f97316}
+
+/* ALERT BANNER */
+.alert-ban{display:none;padding:12px 18px;background:#fef2f2;border:1px solid #fca5a5;border-left:5px solid var(--red);border-radius:8px;margin-bottom:14px;align-items:center;gap:12px}
+.alert-ban.show{display:flex}
+.ab-ico{font-size:22px}
+.ab-txt{flex:1}
+.ab-title{font-size:14px;font-weight:700;color:var(--red);margin-bottom:2px}
+.ab-sub{font-size:12px;color:#991b1b}
+.ab-ts{font-family:var(--fm);font-size:10px;color:var(--t4)}
+
+/* TURBIDITY SCALE LEGEND */
+.turb-legend{background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:12px 16px;margin-bottom:14px;box-shadow:var(--sh)}
+.turb-legend h3{font-family:var(--fd);font-size:13px;font-weight:700;color:var(--g1);margin-bottom:8px}
+.turb-scale{display:flex;gap:8px;flex-wrap:wrap}
+.ts-item{flex:1;min-width:110px;padding:7px 10px;border-radius:6px;font-size:11px;font-weight:600;text-align:center;border:1px solid}
+.ts-item.safe{background:#f0fdfa;border-color:var(--g3);color:var(--g1)}
+.ts-item.low{background:#fefce8;border-color:#fde68a;color:#854d0e}
+.ts-item.mod{background:#fff7ed;border-color:#fed7aa;color:#c2410c}
+.ts-item.unsafe{background:#fef2f2;border-color:#fca5a5;color:#dc2626}
+.ts-item.high{background:#fdf2f8;border-color:#f0abfc;color:#7c3aed}
+.ts-adc{font-family:var(--fm);font-size:10px;margin-top:3px;opacity:.8}
+
+/* INFO ROW */
+.info-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px}
+.ir{background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:13px;text-align:center;box-shadow:var(--sh)}
+.ir-v{font-family:var(--fm);font-size:20px;font-weight:700;display:block;margin-bottom:3px}
+.ir-v.g{color:var(--g1)}.ir-v.r{color:var(--red)}.ir-v.b{color:var(--blue)}.ir-v.a{color:var(--amber)}
+.ir-l{font-size:10px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:.06em}
+
+/* SENSOR CARDS */
+.sc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:20px}
+.sc{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:18px;transition:all .3s;box-shadow:var(--sh);animation:cardIn .4s ease both}
+.sc.warn{border-color:#fbbf24}
+.sc.danger{border-color:var(--red);animation:cardIn .4s ease both,alertPulse 2s infinite}
+.sc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sc-ico{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.sc-ico.a{background:#fffbeb;border:1px solid #fde68a}
+.sc-ico.b{background:#eff6ff;border:1px solid #bfdbfe}
+.sc-ico.g{background:var(--g4);border:1px solid var(--g5)}
+.sc-ico.p{background:#faf5ff;border:1px solid #e9d5ff}
+.sc-bdg{font-size:9px;font-weight:700;letter-spacing:.07em;padding:2px 8px;border-radius:20px;border:1px solid}
+.sc-bdg.ok{background:var(--g4);color:var(--g1);border-color:var(--g5)}
+.sc-bdg.warn{background:#fffbeb;color:var(--amber);border-color:#fde68a}
+.sc-bdg.danger{background:#fef2f2;color:var(--red);border-color:#fca5a5}
+.sc-val{font-family:var(--fm);font-size:34px;font-weight:700;line-height:1;transition:color .3s}
+.sc-val.ok{color:var(--g1)}.sc-val.warn{color:var(--amber)}.sc-val.danger{color:var(--red)}
+.sc-unit{font-family:var(--fm);font-size:12px;color:var(--t3);margin-left:3px}
+.sc-name{font-size:11px;font-weight:700;color:var(--t3);margin-top:7px;letter-spacing:.05em;text-transform:uppercase}
+.sc-sub{font-size:10px;color:var(--t4);margin-top:2px;font-family:var(--fm)}
+.sc-bar{height:4px;background:var(--bg);border-radius:2px;margin-top:9px;overflow:hidden}
+.sc-fill{height:100%;border-radius:2px;transition:width .8s ease,background .3s}
+.sc-lim{font-family:var(--fm);font-size:10px;color:var(--t4);margin-top:4px}
+
+/* CHARTS */
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+@media(max-width:1100px){.g4{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.g4{grid-template-columns:1fr}}
+.gc{background:var(--card);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;box-shadow:var(--sh);animation:cardIn .5s ease both}
+.gc-hdr{padding:10px 14px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;background:var(--bg)}
+.gc-title{font-family:var(--fd);font-size:12.5px;font-weight:700;color:var(--t2)}
+.gc-curr{font-family:var(--fm);font-size:12px;font-weight:700}
+.gc-curr.ok{color:var(--g1)}.gc-curr.danger{color:var(--red)}
+.gc-body{padding:10px;height:175px;background:#fff}
+.gc-body canvas{width:100%!important;height:100%!important}
+.gc-ftr{padding:6px 14px;border-top:1px solid var(--bdr);display:flex;gap:12px;background:#fafafa;flex-wrap:wrap}
+.gcf{font-size:10px;color:var(--t4);font-family:var(--fm)}
+.gcf span{color:var(--t2)}
+
+.log{background:var(--card);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;box-shadow:var(--sh)}
+.log-hdr{padding:10px 16px;border-bottom:1px solid var(--bdr);background:var(--bg);display:flex;align-items:center;justify-content:space-between}
+.log-hdr h3{font-family:var(--fd);font-size:13px;font-weight:700;color:var(--t2)}
+.log-body{padding:10px;max-height:120px;overflow-y:auto}
+.li{font-family:var(--fm);font-size:11px;padding:4px 10px;border-radius:4px;margin-bottom:3px;border-left:3px solid var(--bdr)}
+.li.ok{color:var(--g1);background:var(--g4);border-left-color:var(--g2)}
+.li.alert{color:var(--red);background:#fef2f2;border-left-color:var(--red)}
+.li.sw{color:var(--blue);background:#eff6ff;border-left-color:var(--blue)}
+.li.info{color:var(--t2);background:#f8fafc}
+
+.footer{background:var(--g1);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:auto}
+.fl{font-size:11px;color:var(--g3);line-height:1.6}
+.fr{font-family:var(--fm);font-size:10px;color:rgba(153,246,228,.6)}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <span class="tb-l">Tamil Nadu Environmental Monitoring — Industry Compliance Portal</span>
+  <div class="tb-r"><span class="cdot" id="cdot"></span><span class="ctxt" id="ctxt">CONNECTING…</span></div>
+</div>
+
+<div class="hdr">
+  <div class="hdr-inner">
+    <div class="logo">🏭</div>
+    <div class="hdr-text">
+      <div class="hdr-tag">Tamil Nadu Environmental Monitoring Authority — Industry View</div>
+      <div class="hdr-title">Real-time Environmental Compliance Dashboard</div>
+      <div class="hdr-sub">Live sensor data · Salem District · Government of Tamil Nadu · 2026</div>
+    </div>
+    <div class="hdr-r">
+      <div class="pill"><span class="pdot"></span><span class="ptxt">LIVE</span></div>
+      <div class="clock" id="clk">--:--:-- IST</div>
+    </div>
+  </div>
+</div>
+
+<div class="ticker">
+  <span class="t-lbl">LIVE FEED</span>
+  <div class="t-scroll"><span id="ticker-txt">Connecting to monitoring server…</span></div>
+</div>
+
+<div class="main">
+
+  <!-- Buck Converter Switch Banner -->
+  <div class="sw-banner on" id="sw-banner">
+    <span class="sw-dot"></span>
+    <span id="sw-txt">Buck Converter Power: Checking…</span>
+    <span style="margin-left:auto;font-family:var(--fm);font-size:10px;color:var(--t3)" id="sw-ts"></span>
+  </div>
+
+  <!-- Alert Banner -->
+  <div class="alert-ban" id="alert-ban">
+    <span class="ab-ico">🚨</span>
+    <div class="ab-txt">
+      <div class="ab-title" id="ab-title">Threshold Exceeded</div>
+      <div class="ab-sub">Sensors exceeded permitted limits. Regulatory authority has been notified.</div>
+    </div>
+    <span class="ab-ts" id="ab-ts">—</span>
+  </div>
+
+  <!-- Turbidity Scale Reference -->
+  <div class="turb-legend">
+    <h3>💧 Water Turbidity Scale — ADC to NTU Mapping</h3>
+    <div class="turb-scale">
+      <div class="ts-item safe">✅ SAFE<br/><b>1.0 NTU</b><div class="ts-adc">ADC 4095 – 3000</div></div>
+      <div class="ts-item low">⚠ LOW RISK<br/><b>1 – 2 NTU</b><div class="ts-adc">ADC 3000 – 2250</div></div>
+      <div class="ts-item mod">🟠 MODERATE<br/><b>2 – 3 NTU</b><div class="ts-adc">ADC 2250 – 1500</div></div>
+      <div class="ts-item unsafe">🔴 UNSAFE<br/><b>3 – 4 NTU</b><div class="ts-adc">ADC 1500 – 750</div></div>
+      <div class="ts-item high">🚨 HIGHLY UNSAFE<br/><b>4 – 5 NTU</b><div class="ts-adc">ADC 750 – 0</div></div>
+    </div>
+  </div>
+
+  <!-- Info Row -->
+  <div class="info-row">
+    <div class="ir"><span class="ir-v g" id="ir-reads">0</span><span class="ir-l">Readings</span></div>
+    <div class="ir"><span class="ir-v r" id="ir-alerts">0</span><span class="ir-l">Active Alerts</span></div>
+    <div class="ir"><span class="ir-v b" id="ir-status">—</span><span class="ir-l">Compliance</span></div>
+    <div class="ir"><span class="ir-v a" id="ir-ts">—</span><span class="ir-l">Last Updated</span></div>
+    <div class="ir"><span class="ir-v g" id="ir-sw">—</span><span class="ir-l">Buck Switch</span></div>
+  </div>
+
+  <!-- 4 Sensor Cards -->
+  <div class="sc-grid">
+    <div class="sc" id="sc-mq2" style="animation-delay:.0s">
+      <div class="sc-top"><div class="sc-ico a">🔥</div><span class="sc-bdg ok" id="bdg-mq2">WAITING</span></div>
+      <div><span class="sc-val ok" id="val-mq2">—</span><span class="sc-unit">ppm</span></div>
+      <div class="sc-name">MQ-2 Smoke / Gas Sensor</div>
+      <div class="sc-bar"><div class="sc-fill" id="bar-mq2" style="width:0;background:var(--g2)"></div></div>
+      <div class="sc-lim">Permitted limit: 300 ppm</div>
+    </div>
+    <div class="sc" id="sc-mq135" style="animation-delay:.08s">
+      <div class="sc-top"><div class="sc-ico b">🌫️</div><span class="sc-bdg ok" id="bdg-mq135">WAITING</span></div>
+      <div><span class="sc-val ok" id="val-mq135">—</span><span class="sc-unit">ppm</span></div>
+      <div class="sc-name">MQ-135 Air Quality Sensor</div>
+      <div class="sc-bar"><div class="sc-fill" id="bar-mq135" style="width:0;background:var(--blue)"></div></div>
+      <div class="sc-lim">Permitted limit: 700 ppm</div>
+    </div>
+    <div class="sc" id="sc-ph" style="animation-delay:.16s">
+      <div class="sc-top"><div class="sc-ico g">🧪</div><span class="sc-bdg ok" id="bdg-ph">WAITING</span></div>
+      <div><span class="sc-val ok" id="val-ph">—</span><span class="sc-unit">pH</span></div>
+      <div class="sc-name">Water pH Level</div>
+      <div class="sc-bar"><div class="sc-fill" id="bar-ph" style="width:0;background:var(--g2)"></div></div>
+      <div class="sc-lim">Safe range: 6.5 – 8.5 pH</div>
+    </div>
+    <div class="sc" id="sc-turb" style="animation-delay:.24s">
+      <div class="sc-top"><div class="sc-ico p">💧</div><span class="sc-bdg ok" id="bdg-turb">WAITING</span></div>
+      <div><span class="sc-val ok" id="val-turb">—</span><span class="sc-unit">NTU</span></div>
+      <div class="sc-name">Water Turbidity</div>
+      <div class="sc-sub" id="turb-sub">ADC: — · Quality: —</div>
+      <div class="sc-bar"><div class="sc-fill" id="bar-turb" style="width:0;background:var(--g2)"></div></div>
+      <!-- UPDATED threshold -->
+      <div class="sc-lim">Safe ≤1 NTU (ADC≥3000) · Unsafe &gt;1 NTU (ADC&lt;3000)</div>
+    </div>
+  </div>
+
+  <!-- 4 Individual Charts -->
+  <div class="g4">
+    <div class="gc" style="animation-delay:.0s">
+      <div class="gc-hdr"><span class="gc-title">MQ-2 Smoke (ppm)</span><span class="gc-curr ok" id="curr-mq2">—</span></div>
+      <div class="gc-body"><canvas id="c-mq2"></canvas></div>
+      <div class="gc-ftr"><span class="gcf">Min:<span id="mn-mq2"> —</span></span><span class="gcf">Max:<span id="mx-mq2"> —</span></span><span class="gcf" style="margin-left:auto">Limit:300ppm</span></div>
+    </div>
+    <div class="gc" style="animation-delay:.08s">
+      <div class="gc-hdr"><span class="gc-title">MQ-135 Air (ppm)</span><span class="gc-curr ok" id="curr-mq135">—</span></div>
+      <div class="gc-body"><canvas id="c-mq135"></canvas></div>
+      <div class="gc-ftr"><span class="gcf">Min:<span id="mn-mq135"> —</span></span><span class="gcf">Max:<span id="mx-mq135"> —</span></span><span class="gcf" style="margin-left:auto">Limit:700ppm</span></div>
+    </div>
+    <div class="gc" style="animation-delay:.16s">
+      <div class="gc-hdr"><span class="gc-title">Water pH Level</span><span class="gc-curr ok" id="curr-ph">—</span></div>
+      <div class="gc-body"><canvas id="c-ph"></canvas></div>
+      <div class="gc-ftr"><span class="gcf">Min:<span id="mn-ph"> —</span></span><span class="gcf">Max:<span id="mx-ph"> —</span></span><span class="gcf" style="margin-left:auto">Safe:6.5–8.5</span></div>
+    </div>
+    <!-- UPDATED: Turbidity chart Y-axis 0-5 NTU -->
+    <div class="gc" style="animation-delay:.24s">
+      <div class="gc-hdr"><span class="gc-title">Turbidity (NTU)</span><span class="gc-curr ok" id="curr-turb">—</span></div>
+      <div class="gc-body"><canvas id="c-turb"></canvas></div>
+      <div class="gc-ftr"><span class="gcf">Min:<span id="mn-turb"> —</span></span><span class="gcf">Max:<span id="mx-turb"> —</span></span><span class="gcf" style="margin-left:auto">Safe≤1NTU</span></div>
+    </div>
+  </div>
+
+  <!-- Log -->
+  <div class="log">
+    <div class="log-hdr"><h3>📋 System Notifications</h3></div>
+    <div class="log-body" id="log-body">
+      <div class="li info">[--:--:--] Connecting to environmental monitoring server…</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <div class="fl">© 2026 Tamil Nadu Environmental Monitoring Authority &nbsp;|&nbsp; Industry Compliance Portal &nbsp;|&nbsp; View Only &nbsp;|&nbsp; Salem District</div>
+  <div class="fr">Firebase RTDB · ESP32 WROOM-32 · Turbidity: ADC≥3000=SAFE · 2026</div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey:            "AIzaSyDWqSLILyLtaUfWrodDoGFWEmQ5sF-fqPU",
+  authDomain:        "tn-env-monitor.firebaseapp.com",
+  databaseURL:       "https://tn-env-monitor-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:         "tn-env-monitor",
+  storageBucket:     "tn-env-monitor.firebasestorage.app",
+  messagingSenderId: "206475227419",
+  appId:             "1:206475227419:web:b3f9222980b1dcc7f463be"
+};
+
+// UPDATED thresholds — Turbidity = 1 NTU
+const TH = { mq2:300, mq135:700, phLo:6.5, phHi:8.5, turb:1.0 };
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// Charts — UPDATED: Turbidity Y-axis 0 to 5 NTU
+const MAX=30, LBL=[], M2=[], M135=[], PH=[], T=[];
+const mkC=(id,data,col,unit,a,b)=>new Chart(document.getElementById(id),{
+  type:'line',
+  data:{labels:LBL,datasets:[{data,borderColor:col,backgroundColor:col+'15',borderWidth:2,pointRadius:2,fill:true,tension:0.35}]},
+  options:{
+    responsive:true,maintainAspectRatio:false,animation:false,
+    plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',borderColor:col,borderWidth:1,callbacks:{label:c=>` ${c.parsed.y} ${unit}`}}},
+    scales:{
+      x:{ticks:{maxTicksLimit:6,color:'#94a3b8',font:{size:9}},grid:{color:'#f1f5f9'}},
+      y:{min:a,max:b,ticks:{color:'#94a3b8',font:{size:9}},grid:{color:'#f1f5f9'},title:{display:true,text:unit,color:'#94a3b8',font:{size:9}}}
+    }
+  }
+});
+const cM2   = mkC('c-mq2',  M2,  '#d97706','ppm',0,1000);
+const cM135 = mkC('c-mq135',M135,'#2563eb','ppm',0,2000);
+const cPH   = mkC('c-ph',   PH,  '#0f766e','pH', 0,14);
+// UPDATED: Y-axis 0-5 NTU for turbidity
+const cT    = mkC('c-turb', T,   '#7c3aed','NTU',0,5);
+
+// Connection
+db.ref('.info/connected').on('value',snap=>{
+  const on=snap.val();
+  document.getElementById('cdot').className='cdot'+(on?' on':'');
+  document.getElementById('ctxt').textContent=on?'LIVE':'RECONNECTING…';
+  addLog(on?'ok':'info',on?'Connected to monitoring server.':'Connection lost — retrying…');
+});
+
+let cnt=0, alerts=0;
+db.ref('/sensors/live').on('value',snap=>{
+  const d=snap.val(); if(!d) return;
+  if(d.meta?.count) cnt=d.meta.count; else cnt++;
+
+  const ts=new Date().toLocaleTimeString('en-IN',{hour12:false});
+  if(LBL.length>=MAX){[LBL,M2,M135,PH,T].forEach(a=>a.shift());}
+  LBL.push(ts);
+
+  const v2   = +(d.mq2?.value        ??0).toFixed(1);
+  const v135 = +(d.mq135?.value       ??0).toFixed(1);
+  const vph  = +(d.ph?.value          ??7).toFixed(2);
+  // UPDATED: Turbidity 0-5 NTU scale
+  const vt   = +(d.turbidity?.value   ??0).toFixed(2);
+  const rawADC  = d.turbidity?.raw_adc  ?? '—';
+  const quality = d.turbidity?.quality  ?? '—';
+
+  M2.push(v2);M135.push(v135);PH.push(vph);T.push(vt);
+  [cM2,cM135,cPH,cT].forEach(c=>c.update('none'));
+
+  // Sensor cards
+  updSC('mq2',  v2,  'ppm',TH.mq2,  0,1000,v2>TH.mq2,  v2>TH.mq2*.8);
+  updSC('mq135',v135,'ppm',TH.mq135,0,2000,v135>TH.mq135,v135>TH.mq135*.8);
+  const phOk=vph>=TH.phLo&&vph<=TH.phHi;
+  updSCph(vph);
+  // UPDATED: Turbidity card with new scale
+  updSCturb(vt, rawADC, quality);
+
+  // Chart current values
+  updCurr('mq2',  v2,  v2>TH.mq2);
+  updCurr('mq135',v135,v135>TH.mq135);
+  updCurr('ph',   vph, !phOk);
+  updCurr('turb', vt,  vt>TH.turb);
+
+  setMM('mq2',M2);setMM('mq135',M135);setMM('ph',PH);setMM('turb',T);
+
+  document.getElementById('ir-reads').textContent=cnt;
+  document.getElementById('ir-ts').textContent=ts;
+
+  const turbSafe=vt<=TH.turb;
+  const exc=[v2>TH.mq2,v135>TH.mq135,!phOk,!turbSafe];
+  alerts=exc.filter(Boolean).length;
+  document.getElementById('ir-alerts').textContent=alerts;
+  const stEl=document.getElementById('ir-status');
+  stEl.textContent=alerts>0?'NON-COMPLIANT':'COMPLIANT';
+  stEl.className='ir-v '+(alerts>0?'r':'g');
+
+  const ban=document.getElementById('alert-ban');
+  if(alerts>0){
+    ban.classList.add('show');
+    document.getElementById('ab-title').textContent=`⚠ ${alerts} sensor(s) exceeding permitted limits`;
+    document.getElementById('ab-ts').textContent=ts;
+    addLog('alert','ALERT: '+alerts+' sensor(s) exceeded limits — '+ts);
+  } else {
+    ban.classList.remove('show');
+  }
+
+  // Switch from meta
+  if(d.meta?.switch) updateSwitch(d.meta.switch,ts);
+
+  // Ticker — UPDATED turbidity text
+  document.getElementById('ticker-txt').textContent=
+    'Salem · MQ-2:'+v2+'ppm  |  MQ-135:'+v135+'ppm  |  pH:'+vph+
+    '  |  Turbidity:'+vt+'NTU ('+quality+') ADC:'+rawADC+
+    '  |  '+(alerts>0?alerts+' ALERT(S)':'All Compliant')+
+    '  |  Updated:'+ts+'  |  TN Environmental Authority · 2026  |  ';
+});
+
+// Buck switch
+db.ref('/sensors/switch').on('value',snap=>{
+  const sw=snap.val(); if(!sw) return;
+  const ts=new Date().toLocaleTimeString('en-IN',{hour12:false});
+  updateSwitch(sw.status||'—',ts);
+  addLog('sw','Buck converter: '+(sw.status||'?')+' — '+(sw.message||''));
+});
+
+function updateSwitch(status,ts){
+  const ban=document.getElementById('sw-banner');
+  ban.className='sw-banner '+(status==='ON'?'on':'off');
+  document.getElementById('sw-txt').textContent='Buck Converter Power: '+status+(status==='ON'?' — System Running':' — System Stopped');
+  document.getElementById('ir-sw').textContent=status;
+  document.getElementById('ir-sw').className='ir-v '+(status==='ON'?'g':'a');
+  document.getElementById('sw-ts').textContent='Updated: '+ts;
+}
+
+// UPDATED: Turbidity sensor card — new 0-5 NTU scale
+function updSCturb(val, rawAdc, quality){
+  const danger = val > TH.turb;
+  const st     = danger ? 'danger' : 'ok';
+  const label  = danger ? 'UNSAFE WATER' : 'SAFE WATER';
+
+  const v=document.getElementById('val-turb');  v.textContent=val; v.className='sc-val '+st;
+  const b=document.getElementById('bdg-turb');  b.textContent=label; b.className='sc-bdg '+st;
+
+  // Progress bar: 0 NTU = empty, 5 NTU = full
+  const pct=Math.min(100,(val/5)*100);
+  const bar=document.getElementById('bar-turb');
+  bar.style.width=pct+'%';
+  bar.style.background=danger?'var(--red)':'var(--g2)';
+
+  // Show ADC and quality
+  const sub=document.getElementById('turb-sub');
+  if(sub) sub.textContent='ADC: '+rawAdc+' · '+quality;
+
+  document.getElementById('sc-turb').className='sc '+(danger?'danger':'');
+}
+
+function updSC(id,val,unit,thresh,mn,mx,danger,warn){
+  const pct=Math.min(100,((val-mn)/(mx-mn))*100)||0;
+  const st=danger?'danger':warn?'warn':'ok';
+  const v=document.getElementById('val-'+id); v.textContent=val; v.className='sc-val '+st;
+  const b=document.getElementById('bdg-'+id); b.textContent=danger?'EXCEEDED':warn?'WARNING':'COMPLIANT'; b.className='sc-bdg '+st;
+  const bar=document.getElementById('bar-'+id); bar.style.width=pct+'%';
+  bar.style.background=danger?'var(--red)':warn?'var(--amber)':'var(--g2)';
+  document.getElementById('sc-'+id).className='sc '+(danger?'danger':warn?'warn':'');
+}
+function updSCph(val){
+  const ok=val>=TH.phLo&&val<=TH.phHi; const pct=(val/14)*100;
+  const v=document.getElementById('val-ph'); v.textContent=val; v.className='sc-val '+(ok?'ok':'danger');
+  const b=document.getElementById('bdg-ph'); b.textContent=ok?'COMPLIANT':val<TH.phLo?'TOO ACIDIC':'TOO ALKALINE'; b.className='sc-bdg '+(ok?'ok':'danger');
+  const bar=document.getElementById('bar-ph'); bar.style.width=pct+'%'; bar.style.background=ok?'var(--g2)':'var(--red)';
+  document.getElementById('sc-ph').className='sc '+(ok?'':'danger');
+}
+function updCurr(id,val,bad){
+  const el=document.getElementById('curr-'+id);
+  el.textContent=val; el.className='gc-curr '+(bad?'danger':'ok');
+}
+function setMM(id,arr){
+  if(!arr.length) return;
+  document.getElementById('mn-'+id).textContent=' '+Math.min(...arr).toFixed(2);
+  document.getElementById('mx-'+id).textContent=' '+Math.max(...arr).toFixed(2);
+}
+function addLog(type,msg){
+  const ts=new Date().toLocaleTimeString('en-IN',{hour12:false});
+  const b=document.getElementById('log-body');
+  const el=document.createElement('div'); el.className='li '+type;
+  el.textContent='['+ts+'] '+msg; b.prepend(el);
+  while(b.children.length>50) b.removeChild(b.lastChild);
+}
+function tick(){
+  const ist=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Kolkata'}));
+  document.getElementById('clk').textContent=ist.toLocaleTimeString('en-IN',{hour12:false})+' IST';
+}
+setInterval(tick,1000); tick();
+addLog('info','Industry dashboard loaded. Turbidity: ADC≥3000=SAFE(1 NTU), ADC<3000=UNSAFE(1–5 NTU)');
+</script>
+</body>
+</html>
